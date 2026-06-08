@@ -1,0 +1,1 @@
+alter table attendances add column if not exists message text;
