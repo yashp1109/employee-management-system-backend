@@ -8,13 +8,16 @@ import com.example.ems.designation.DesignationService;
 import com.example.ems.security.CurrentUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -26,29 +29,58 @@ public class EmployeeService {
     private final CurrentUserService currentUserService;
 
     @Transactional(readOnly = true)
-    public Page<EmployeeDto> search(String q, Pageable pageable) {
+    public Page<EmployeeDto> search(String q, Long departmentId, Long managerId,
+                                    LocalDate joiningFrom, LocalDate joiningTo, Pageable pageable) {
         Employee currentUser = currentUserService.employee();
-        boolean isAdminOrHr = currentUser.getRole() == Role.ADMIN || currentUser.getRole() == Role.HR;
-        if (isAdminOrHr) {
-            Page<Employee> employees = StringUtils.hasText(q)
-                    ? repository.search(q, pageable)
-                    : repository.findAll(pageable);
-            return employees.map(this::toDto);
+        Specification<Employee> spec = Specification.where(visibilitySpec(currentUser))
+                .and(querySpec(q))
+                .and(departmentId == null ? null
+                        : (root, cq, cb) -> cb.equal(root.get("department").get("id"), departmentId))
+                .and(managerId == null ? null
+                        : (root, cq, cb) -> cb.equal(root.get("manager").get("id"), managerId))
+                .and(joiningFrom == null ? null
+                        : (root, cq, cb) -> cb.greaterThanOrEqualTo(root.get("dateOfJoining"), joiningFrom))
+                .and(joiningTo == null ? null
+                        : (root, cq, cb) -> cb.lessThanOrEqualTo(root.get("dateOfJoining"), joiningTo));
+        return repository.findAll(spec, pageable).map(this::toDto);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ManagerDto> managers() {
+        return repository.findDistinctManagers().stream()
+                .map(m -> new ManagerDto(m.getId(), m.getFirstName() + " " + m.getLastName()))
+                .toList();
+    }
+
+    private Specification<Employee> visibilitySpec(Employee currentUser) {
+        if (currentUser.getRole() == Role.ADMIN || currentUser.getRole() == Role.HR) {
+            return null;
         }
         if (currentUser.getRole() == Role.MANAGER && currentUser.getDepartment() != null) {
-            if (StringUtils.hasText(q)) {
-                Page<Employee> employees = repository.search(q, Pageable.unpaged());
-                var filtered = employees.stream()
-                        .filter(e -> e.getDepartment() != null && currentUser.getDepartment().getId().equals(e.getDepartment().getId()))
-                        .toList();
-                return new PageImpl<>(filtered, pageable, filtered.size()).map(this::toDto);
-            }
-            return repository.findByDepartmentId(currentUser.getDepartment().getId(), pageable).map(this::toDto);
+            Long deptId = currentUser.getDepartment().getId();
+            return (root, cq, cb) -> cb.equal(root.get("department").get("id"), deptId);
         }
-        if (StringUtils.hasText(q) && !matchesQuery(currentUser, q)) {
-            return Page.empty(pageable);
+        Long selfId = currentUser.getId();
+        return (root, cq, cb) -> cb.equal(root.get("id"), selfId);
+    }
+
+    private Specification<Employee> querySpec(String q) {
+        if (!StringUtils.hasText(q)) {
+            return null;
         }
-        return new PageImpl<>(java.util.List.of(currentUser), pageable, 1).map(this::toDto);
+        String like = "%" + q.trim().toLowerCase() + "%";
+        return (root, cq, cb) -> {
+            var department = root.join("department", jakarta.persistence.criteria.JoinType.LEFT);
+            var designation = root.join("designation", jakarta.persistence.criteria.JoinType.LEFT);
+            return cb.or(
+                    cb.like(cb.lower(root.get("firstName")), like),
+                    cb.like(cb.lower(root.get("lastName")), like),
+                    cb.like(cb.lower(root.get("email")), like),
+                    cb.like(cb.lower(root.get("employeeCode")), like),
+                    cb.like(cb.lower(cb.coalesce(department.get("name"), "")), like),
+                    cb.like(cb.lower(cb.coalesce(designation.get("name"), "")), like)
+            );
+        };
     }
 
     @Transactional(readOnly = true)
@@ -109,7 +141,7 @@ public class EmployeeService {
         employee.setDateOfBirth(request.dateOfBirth());
         employee.setDateOfJoining(request.dateOfJoining());
         employee.setDepartment(departmentService.get(request.departmentId()));
-        employee.setDesignation(designationService.get(request.designationId()));
+        employee.setDesignation(request.designationId() == null ? null : designationService.get(request.designationId()));
         employee.setSalary(request.salary());
         employee.setManager(request.managerId() == null ? null : get(request.managerId()));
         employee.setStatus(request.status());
@@ -127,15 +159,6 @@ public class EmployeeService {
                 && currentUser.getDepartment() != null
                 && employee.getDepartment() != null
                 && currentUser.getDepartment().getId().equals(employee.getDepartment().getId());
-    }
-
-    private boolean matchesQuery(Employee employee, String query) {
-        String normalized = query.trim().toLowerCase();
-        return employee.getFirstName().toLowerCase().contains(normalized)
-                || employee.getLastName().toLowerCase().contains(normalized)
-                || employee.getEmail().toLowerCase().contains(normalized)
-                || employee.getEmployeeCode().toLowerCase().contains(normalized)
-                || (employee.getDepartment() != null && employee.getDepartment().getName().toLowerCase().contains(normalized));
     }
 
     @Transactional(value = "true")

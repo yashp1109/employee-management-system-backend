@@ -4,11 +4,13 @@ import com.example.ems.common.Status;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
-public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+public interface EmployeeRepository extends JpaRepository<Employee, Long>, JpaSpecificationExecutor<Employee> {
     Optional<Employee> findByEmailIgnoreCase(String email);
     boolean existsByEmailIgnoreCase(String email);
     boolean existsByEmployeeCodeIgnoreCase(String employeeCode);
@@ -28,4 +30,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
                or lower(coalesce(des.name, '')) like lower(concat('%', :q, '%'))
             """)
     Page<Employee> search(String q, Pageable pageable);
+
+    @Query("select distinct e.manager from Employee e where e.manager is not null order by e.manager.firstName, e.manager.lastName")
+    List<Employee> findDistinctManagers();
 }
