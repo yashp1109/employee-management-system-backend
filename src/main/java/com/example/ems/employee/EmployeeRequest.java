@@ -18,7 +18,7 @@ public record EmployeeRequest(
         @Past LocalDate dateOfBirth,
         @NotNull LocalDate dateOfJoining,
         @NotNull Long departmentId,
-        @NotNull Long designationId,
+        Long designationId,
         @NotNull @DecimalMin("0.0") BigDecimal salary,
         Long managerId,
         @NotNull Status status,

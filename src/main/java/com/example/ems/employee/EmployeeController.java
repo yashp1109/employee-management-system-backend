@@ -4,8 +4,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/employees")
@@ -14,8 +18,20 @@ public class EmployeeController {
     private final EmployeeService service;
 
     @GetMapping
-    Page<EmployeeDto> search(@RequestParam(required = false) String q, Pageable pageable) {
-        return service.search(q, pageable);
+    Page<EmployeeDto> search(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) Long departmentId,
+            @RequestParam(required = false) Long managerId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate joiningFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate joiningTo,
+            Pageable pageable) {
+        return service.search(q, departmentId, managerId, joiningFrom, joiningTo, pageable);
+    }
+
+    @GetMapping("/managers")
+    @PreAuthorize("hasAnyRole('ADMIN','HR','MANAGER')")
+    List<ManagerDto> managers() {
+        return service.managers();
     }
 
     @GetMapping("/me")
