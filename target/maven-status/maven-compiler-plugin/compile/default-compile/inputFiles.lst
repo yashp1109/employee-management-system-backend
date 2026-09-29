@@ -9,6 +9,7 @@ C:\Users\yashk\OneDrive\Desktop\Spring Boot\Angular\Employee Management System\b
 C:\Users\yashk\OneDrive\Desktop\Spring Boot\Angular\Employee Management System\backend\src\main\java\com\example\ems\common\ApiError.java
 C:\Users\yashk\OneDrive\Desktop\Spring Boot\Angular\Employee Management System\backend\src\main\java\com\example\ems\common\ApiResonse.java
 C:\Users\yashk\OneDrive\Desktop\Spring Boot\Angular\Employee Management System\backend\src\main\java\com\example\ems\common\BadRequestException.java
+C:\Users\yashk\OneDrive\Desktop\Spring Boot\Angular\Employee Management System\backend\src\main\java\com\example\ems\common\DuplicateResourceException.java
 C:\Users\yashk\OneDrive\Desktop\Spring Boot\Angular\Employee Management System\backend\src\main\java\com\example\ems\common\Gender.java
 C:\Users\yashk\OneDrive\Desktop\Spring Boot\Angular\Employee Management System\backend\src\main\java\com\example\ems\common\GlobalExceptionHandler.java
 C:\Users\yashk\OneDrive\Desktop\Spring Boot\Angular\Employee Management System\backend\src\main\java\com\example\ems\common\ResourceNotFoundException.java
@@ -29,6 +30,7 @@ C:\Users\yashk\OneDrive\Desktop\Spring Boot\Angular\Employee Management System\b
 C:\Users\yashk\OneDrive\Desktop\Spring Boot\Angular\Employee Management System\backend\src\main\java\com\example\ems\designation\DesignationDto.java
 C:\Users\yashk\OneDrive\Desktop\Spring Boot\Angular\Employee Management System\backend\src\main\java\com\example\ems\designation\DesignationRepository.java
 C:\Users\yashk\OneDrive\Desktop\Spring Boot\Angular\Employee Management System\backend\src\main\java\com\example\ems\designation\DesignationService.java
+C:\Users\yashk\OneDrive\Desktop\Spring Boot\Angular\Employee Management System\backend\src\main\java\com\example\ems\EmployeeManagementSystemApplication.java
 C:\Users\yashk\OneDrive\Desktop\Spring Boot\Angular\Employee Management System\backend\src\main\java\com\example\ems\employee\Employee.java
 C:\Users\yashk\OneDrive\Desktop\Spring Boot\Angular\Employee Management System\backend\src\main\java\com\example\ems\employee\EmployeeController.java
 C:\Users\yashk\OneDrive\Desktop\Spring Boot\Angular\Employee Management System\backend\src\main\java\com\example\ems\employee\EmployeeDto.java
@@ -36,7 +38,7 @@ C:\Users\yashk\OneDrive\Desktop\Spring Boot\Angular\Employee Management System\b
 C:\Users\yashk\OneDrive\Desktop\Spring Boot\Angular\Employee Management System\backend\src\main\java\com\example\ems\employee\EmployeeRepository.java
 C:\Users\yashk\OneDrive\Desktop\Spring Boot\Angular\Employee Management System\backend\src\main\java\com\example\ems\employee\EmployeeRequest.java
 C:\Users\yashk\OneDrive\Desktop\Spring Boot\Angular\Employee Management System\backend\src\main\java\com\example\ems\employee\EmployeeService.java
-C:\Users\yashk\OneDrive\Desktop\Spring Boot\Angular\Employee Management System\backend\src\main\java\com\example\ems\EmployeeManagementSystemApplication.java
+C:\Users\yashk\OneDrive\Desktop\Spring Boot\Angular\Employee Management System\backend\src\main\java\com\example\ems\employee\ManagerDto.java
 C:\Users\yashk\OneDrive\Desktop\Spring Boot\Angular\Employee Management System\backend\src\main\java\com\example\ems\leave\LeaveBalance.java
 C:\Users\yashk\OneDrive\Desktop\Spring Boot\Angular\Employee Management System\backend\src\main\java\com\example\ems\leave\LeaveBalanceRepository.java
 C:\Users\yashk\OneDrive\Desktop\Spring Boot\Angular\Employee Management System\backend\src\main\java\com\example\ems\leave\LeaveController.java

@@ -83,6 +83,12 @@ create table attendances (
 );
 
 insert into
+    leave_types (name, annual_quota)
+values ('Casual Leave', 12),
+       ('Sick Leave', 10),
+       ('Earned Leave', 15);
+
+insert into
     departments (name, description)
 values (
         'Administration',
@@ -127,9 +133,3 @@ values (
         'Application development',
         3
     );
-
-insert into
-    leave_types (name, annual_quota)
-values ('Casual Leave', 12),
-    ('Sick Leave', 10),
-    ('Earned Leave', 15);

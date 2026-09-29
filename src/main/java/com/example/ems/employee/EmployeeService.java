@@ -3,8 +3,13 @@ package com.example.ems.employee;
 import com.example.ems.common.BadRequestException;
 import com.example.ems.common.ResourceNotFoundException;
 import com.example.ems.common.Role;
+import com.example.ems.department.Department;
 import com.example.ems.department.DepartmentService;
 import com.example.ems.designation.DesignationService;
+import com.example.ems.leave.LeaveBalance;
+import com.example.ems.leave.LeaveBalanceRepository;
+import com.example.ems.leave.LeaveType;
+import com.example.ems.leave.LeaveTypeRepository;
 import com.example.ems.security.CurrentUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
+import java.time.Year;
 import java.util.List;
 
 @Service
@@ -27,6 +33,8 @@ public class EmployeeService {
     private final DesignationService designationService;
     private final PasswordEncoder passwordEncoder;
     private final CurrentUserService currentUserService;
+    private final LeaveTypeRepository leaveTypeRepository;
+    private final LeaveBalanceRepository leaveBalanceRepository;
 
     @Transactional(readOnly = true)
     public Page<EmployeeDto> search(String q, Long departmentId, Long managerId,
@@ -109,7 +117,11 @@ public class EmployeeService {
         Employee employee = new Employee();
         apply(request, employee);
         employee.setPasswordHash(passwordEncoder.encode(StringUtils.hasText(request.password()) ? request.password() : "Password@123"));
-        return toDto(repository.save(employee));
+        employee = repository.save(employee);
+
+        // credit default leaves
+        creditDefaultLeaves(employee);
+        return toDto(employee);
     }
 
     @Transactional
@@ -148,6 +160,25 @@ public class EmployeeService {
         employee.setRole(request.role());
     }
 
+    private void creditDefaultLeaves(Employee employee) {
+
+        int currentYear = Year.now().getValue();
+
+        List<LeaveType> leaveTypes = leaveTypeRepository.findAll();
+
+        for (LeaveType leaveType : leaveTypes) {
+
+            LeaveBalance balance = new LeaveBalance();
+            balance.setEmployee(employee);
+            balance.setLeaveType(leaveType);
+            balance.setYear(currentYear);
+            balance.setTotalDays(leaveType.getAnnualQuota());
+            balance.setUsedDays(0);
+
+            leaveBalanceRepository.save(balance);
+        }
+    }
+
     private boolean canViewEmployee(Employee currentUser, Employee employee) {
         if (currentUser.getRole() == Role.ADMIN || currentUser.getRole() == Role.HR) {
             return true;
@@ -164,6 +195,7 @@ public class EmployeeService {
     @Transactional(value = "true")
     private EmployeeDto toDto(Employee employee) {
         Employee manager = employee.getManager();
+        Department department = manager.getDepartment();
         return EmployeeDto.builder()
                 .id(employee.getId())
                 .employeeCode(employee.getEmployeeCode())
@@ -177,7 +209,7 @@ public class EmployeeService {
                 .departmentId(employee.getDepartment() == null ? null : employee.getDepartment().getId())
                 .departmentName(employee.getDepartment() == null ? null : employee.getDepartment().getName())
                 .designationId(employee.getDesignation() == null ? null : employee.getDesignation().getId())
-                .designationName(employee.getDesignation() == null ? null : employee.getDesignation().getName())
+                .designationName(employee.getDesignation() == null ? null : employee.getDesignation ().getName())
                 .salary(employee.getSalary())
                 .managerId(manager == null ? null : manager.getId())
                 .managerName(manager == null ? null : manager.getFirstName() + " " + manager.getLastName())

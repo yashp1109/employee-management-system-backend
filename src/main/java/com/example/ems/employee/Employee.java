@@ -49,18 +49,18 @@ public class Employee {
     private LocalDate dateOfBirth;
     private LocalDate dateOfJoining;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "department_id")
     private Department department;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "designation_id")
     private Designation designation;
 
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal salary;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "manager_id")
     private Employee manager;
 

@@ -31,6 +31,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, JpaSp
             """)
     Page<Employee> search(String q, Pageable pageable);
 
-    @Query("select distinct e.manager from Employee e where e.manager is not null order by e.manager.firstName, e.manager.lastName")
+//    @Query("select distinct e.manager from Employee e where e.manager is not null order by e.manager.firstName, e.manager.lastName")
+    @Query(" select distinct e.manager from Employee e where e.manager.role in ('MANAGER', 'ADMIN','HR') order by e.manager.firstName, e.manager.lastName")
     List<Employee> findDistinctManagers();
 }

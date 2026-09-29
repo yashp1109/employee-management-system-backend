@@ -86,9 +86,6 @@ public class AttendanceService {
             return repository.findByEmployeeIdAndDateBetween(employeeId, start, end, pageable).map(this::toDto);
         }
 
-        if (isAdminOrHr) {
-            return repository.findByDateBetween(start, end, pageable).map(this::toDto);
-        }
         return repository.findByEmployeeAndDateBetween(currentUser, start, end, pageable).map(this::toDto);
     }
 

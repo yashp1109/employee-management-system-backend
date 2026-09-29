@@ -4,11 +4,13 @@ import com.example.ems.common.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 
 public class AuthDtos {
     public record LoginRequest(@Email @NotBlank String email, @NotBlank String password) {
     }
 
+    @Builder
     public record AuthResponse(String accessToken, String refreshToken, Long employeeId, String fullName, Role role, Long departmentId) {
     }
 
